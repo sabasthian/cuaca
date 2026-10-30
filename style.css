@@ -1,0 +1,389 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+    box-sizing: border-box;
+}
+
+/* ====== CSS Variables ====== */
+:root {
+    --bg: #08080b;
+    --bg-card: #0e0e13;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.18);
+    --text: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.55);
+    --text-faint: rgba(255, 255, 255, 0.32);
+}
+
+/* Untuk animasi rotating border */
+@property --angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
+/* ====== Body & Ambient Background ====== */
+body{
+    min-height: 100vh;
+    background: var(--bg);
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* 2 orb drift sebagai ambient light */
+body::before,
+body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+body::before {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.09), transparent 70%);
+    top: -200px;
+    left: -100px;
+    animation: drift 22s ease-in-out infinite;
+}
+
+body::after {
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.055), transparent 70%);
+    bottom: -150px;
+    right: -100px;
+    animation: drift 28s ease-in-out infinite reverse;
+}
+
+@keyframes drift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(70px, 50px) scale(1.15); }
+}
+
+/* ====== Card ====== */
+.card {
+    width: 90%;
+    max-width: 470px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    margin: 100px auto 0;
+    border-radius: 26px;
+    padding: 42px 36px;
+    text-align: center;
+    position: relative;
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    animation: cardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 1;
+}
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Rotating shimmer border */
+.card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(
+        from var(--angle),
+        transparent 0deg,
+        transparent 290deg,
+        rgba(255, 255, 255, 0.55) 320deg,
+        rgba(255, 255, 255, 0.05) 340deg,
+        transparent 360deg
+    );
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    animation: spin 5s linear infinite;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+@keyframes spin {
+    to { --angle: 360deg; }
+}
+
+/* ====== Search ====== */
+.search {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    z-index: 2;
+}
+
+.search input{
+    border: 1px solid var(--border);
+    outline: 0;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text);
+    height: 56px;
+    padding: 0 22px;
+    border-radius: 14px;
+    flex: 1;
+    font-size: 15px;
+    letter-spacing: 0.3px;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.search input::placeholder{
+    color: var(--text-faint);
+    transition: color 0.2s ease;
+}
+
+.search input:hover{
+    border-color: var(--border-strong);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.search input:focus{
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow:
+        0 0 0 4px rgba(255, 255, 255, 0.03),
+        0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.search input:focus::placeholder{
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.search button{
+    border: 1px solid var(--border);
+    outline: 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    width: 56px;
+    height: 56px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.search button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.22), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.search button:hover{
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+}
+
+.search button:hover::before{
+    opacity: 1;
+}
+
+.search button:active{
+    transform: translateY(0) scale(0.96);
+}
+
+.search button img {
+    width: 18px;
+    filter: brightness(0) invert(1);
+    opacity: 0.85;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+}
+
+.search button:hover img {
+    transform: rotate(-12deg) scale(1.12);
+    opacity: 1;
+}
+
+/* ====== Weather Icon ====== */
+.wheater-icon {
+    width: 150px;
+    margin-top: 34px;
+    filter: drop-shadow(0 14px 32px rgba(255, 255, 255, 0.08));
+    animation: float 4.5s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50%      { transform: translateY(-9px) rotate(1deg); }
+}
+
+/* ====== Temperature & City ====== */
+.wheater h1 {
+    font-size: 78px;
+    font-weight: 200;
+    letter-spacing: -3px;
+    line-height: 1;
+    margin-top: 10px;
+    background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.55) 100%);
+    -webkit-background-clip: text;
+            background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.wheater h2 {
+    font-size: 15px;
+    font-weight: 500;
+    margin-top: 14px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 6px;
+}
+
+/* ====== Details ====== */
+.details{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 44px;
+    padding-top: 30px;
+    border-top: 1px solid var(--border);
+    gap: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.col{
+    display: flex;
+    align-items: center;
+    text-align: left;
+    flex: 1;
+    padding: 0 22px;
+    position: relative;
+    transition: opacity 0.2s ease;
+}
+
+.col:first-child { padding-left: 0; }
+.col:last-child  { padding-right: 0; }
+
+/* Divider vertikal antar kolom */
+.col + .col::before{
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 42px;
+    background: linear-gradient(180deg, transparent, var(--border-strong), transparent);
+}
+
+.col:hover{
+    opacity: 0.85;
+}
+
+.col img{
+    width: 28px;
+    margin-right: 14px;
+    opacity: 0.55;
+    filter: brightness(0) invert(1);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.col:hover img{
+    opacity: 1;
+    transform: scale(1.08);
+}
+
+.humidity, .wind{
+    font-size: 22px;
+    margin-top: -2px;
+    color: var(--text);
+    font-weight: 500;
+    line-height: 1;
+}
+
+.humidity-text, .wind-text{
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 500;
+}
+
+/* ====== States ====== */
+.weather{
+    display: none;
+    position: relative;
+    z-index: 1;
+}
+
+.error{
+    text-align: left;
+    margin-top: 16px;
+    display: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 400;
+    padding: 13px 16px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-left: 2px solid rgba(255, 255, 255, 0.45);
+    letter-spacing: 0.3px;
+    line-height: 1.5;
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 480px){
+    .card{
+        padding: 32px 24px;
+        border-radius: 22px;
+        margin-top: 60px;
+    }
+    .wheater-icon{
+        width: 120px;
+    }
+    .wheater h1{
+        font-size: 62px;
+        letter-spacing: -2px;
+    }
+    .wheater h2{
+        font-size: 13px;
+        letter-spacing: 4px;
+    }
+    .humidity, .wind{
+        font-size: 18px;
+    }
+    .humidity-text, .wind-text{
+        font-size: 10px;
+    }
+    .col{
+        padding: 0 14px;
+    }
+}
+
+/* ====== Reduced Motion ====== */
+@media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather App</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="card">
+        <div class="search">
+            <input type="text" placeholder="Input kota anda" spellcheck="false">
+            <button class="search-btn"><img src="images/search.png"></button>
+        </div>
+        <div class="error">
+            <p>Invalid city name</p>
+        </div>
+        <div class="wheater">
+            <img src="images/rain.png" class="wheater-icon">
+            <h1 class="temp">22°C</h1>
+            <h2 class="city">New York</h2>
+            <div class="details">
+                <div class="col">
+                    <img src="images/humidity.png">
+                    <div>
+                        <p class="humidity">50%</p>
+                        <p class="humidity-text">Humidity</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <img src="images/wind.png">
+                    <div>
+                        <p class="wind">15 km/h</p>
+                        <p class="wind-text">Wind Speed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = "d11c44ec8d3d9d3abe24868541891aff";
+        const baseUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric";
+
+        const searchBox = document.querySelector(".search input");
+        const searchBtn = document.querySelector(".search-btn");
+
+        function renderWeather(data) {
+            document.querySelector(".error").style.display = "none";
+            document.querySelector(".wheater").style.display = "block";
+
+            document.querySelector(".city").innerHTML = data.name;
+            document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°C";
+            document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+            document.querySelector(".wind").innerHTML = data.wind.speed + " km/h";
+
+            const condition = data.weather[0].main;
+            const iconMap = {
+                Clouds: "clouds.png",
+                Clear: "clear.png",
+                Rain: "rain.png",
+                Drizzle: "drizzle.png",
+                Mist: "mist.png"
+            };
+
+            document.querySelector(".wheater-icon").src =
+                "images/" + (iconMap[condition] || "clear.png");
+        }
+
+        function showError() {
+            document.querySelector(".error").style.display = "block";
+            document.querySelector(".wheater").style.display = "none";
+        }
+
+        async function checkWeather(city) {
+            if (!city) return;
+
+            try {
+                const response = await fetch(`${baseUrl}&q=${city}&appid=${apiKey}`);
+
+                if (response.status === 404) {
+                    showError();
+                    return;
+                }
+
+                const data = await response.json();
+                renderWeather(data);
+            } catch (err) {
+                console.error("Gagal ambil data cuaca:", err);
+                showError();
+            }
+        }
+
+        async function checkWeatherByCoords(lat, lon) {
+            try {
+                const response = await fetch(`${baseUrl}&lat=${lat}&lon=${lon}&appid=${apiKey}`);
+
+                if (response.status === 404) {
+                    showError();
+                    return;
+                }
+
+                const data = await response.json();
+                renderWeather(data);
+            } catch (err) {
+                console.error("Gagal ambil data cuaca:", err);
+                showError();
+            }
+        }
+
+        function getLocationWeather() {
+            if (!navigator.geolocation) {
+                console.warn("Browser tidak mendukung Geolocation API.");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    checkWeatherByCoords(latitude, longitude);
+                },
+                (error) => {
+                    console.warn("Gagal ambil lokasi:", error.message);
+                    // Diamkan saja / bisa tampilkan pesan default kalau ditolak
+                }
+            );
+        }
+
+        searchBtn.addEventListener("click", () => {
+            checkWeather(searchBox.value.trim());
+        });
+
+        searchBox.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                checkWeather(searchBox.value.trim());
+            }
+        });
+
+        // Otomatis deteksi lokasi & tampilkan cuaca saat halaman dibuka
+        window.addEventListener("load", getLocationWeather);
+    </script>
+</body>
+</html>
